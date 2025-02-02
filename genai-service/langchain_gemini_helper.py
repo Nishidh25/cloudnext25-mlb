@@ -1,13 +1,7 @@
-
-# Path to your service account JSON key file
-key_path = './ss-genai-npd-svc-prj-01-8ccca879e424.json'  
-
-
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./ss-genai-npd-svc-prj-01-8ccca879e424.json"
-
-
-# Create credentials object from the service account
-credentials = service_account.Credentials.from_service_account_file(key_path)
+from PIL import Image
+import base64
+import requests
+import io
 
 
 # Helper functions to process images 
@@ -38,3 +32,16 @@ def image_encode(image_path):
         return None
 
 
+def download_image(image_url, destination_path):
+    # Send a GET request to the image URL
+    response = requests.get(image_url)
+
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Open the destination file in binary write mode and save the content
+        with open(destination_path, 'wb') as file:
+            file.write(response.content)
+        print(f"Image successfully downloaded to {destination_path}")
+        return destination_path
+    else:
+        print(f"Failed to retrieve the image. HTTP Status code: {response.status_code}")

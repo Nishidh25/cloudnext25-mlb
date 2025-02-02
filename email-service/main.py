@@ -24,16 +24,20 @@ SCOPES = [
 ]
 
 
-
-def download_blob(bucket_name, source_blob_name):
+def download_from_gcs(bucket_name, source_blob_name, destination_file_path):
     """Downloads a blob from the bucket and returns its content as a string."""
     storage_client = storage.Client()
-    bucket = storage_client.bucket(bucket_name)
+    
+    # Get the bucket object
+    bucket = storage_client.get_bucket(bucket_name)
+
+    # Get the blob (file) from the bucket
     blob = bucket.blob(source_blob_name)
 
-    content = blob.download_as_string()
-    #print('content', content)
-    return content.decode('utf-8')  # Assuming the file is UTF-8 encoded
+    # Download the file to the local system
+    blob.download_to_filename(destination_file_path)
+
+    return destination_file_path
 
 
 
@@ -144,7 +148,7 @@ def send_message(service, sender, receiver, subject, first_name, last_name, body
               <p>Join the conversation with other fans! Check out the latest discussions, polls, and fan submissions.</p>
               <div style="text-align: center;">
               <a href="https://www.mlb.com/fans" class="cta-button">Join the Discussion</a>
-              <a href="https://www.mlb.com/fans" class="cta-button">Visit </a>
+              <a href="https://mlb-frontend-service-513391239750.asia-south1.run.app" class="cta-button">Visit My MLB</a>
               </div>
 
               <div class="footer">
@@ -210,22 +214,28 @@ def send_email(request):
     
     
     if request_json:
-      sender = request_json.get('sender')
-      receiver = request_json.get('receiver')
-      subject = request_json.get('subject')
-      first_name = request_json.get('first_name')
-      last_name = request_json.get('last_name')
-      body_header = request_json.get('body_header')
-      body_content = request_json.get('body_content')
-      language = request_json.get('language')
-      media_url = request_json.get('media_url')
+        sender = request_json.get('sender')
+        receiver = request_json.get('receiver')
+        subject = request_json.get('subject')
+        first_name = request_json.get('first_name')
+        last_name = request_json.get('last_name')
+        body_header = request_json.get('body_header')
+        body_content = request_json.get('body_content')
+        language = request_json.get('language')
+        media_url = request_json.get('media_url')
 
     if not sender or not receiver:
         return f'{{"error": "Sender and receiver email addresses are required."}}', 400
-
+      
+    if media_url != "":
+      media_path = download_from_gcs('mlb-objects',media_url,"./image.jpg")
+    else:
+      media_path = None
+      
     try:
         service = get_gmail_service()
-        message_id = send_message(service, sender, receiver, subject, first_name,last_name,body_header,body_content,language,media_url)
+        message_id = send_message(service, sender, receiver, subject, first_name,last_name,body_header,body_content,language,media_path)
+
         return f'{{"message": "{message_id}"}}', 200
     except Exception as e:
         return f'{{"error": "{str(e)}"}}', 500
