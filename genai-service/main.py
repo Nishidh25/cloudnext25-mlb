@@ -12,7 +12,7 @@ import json
 import vertexai
 import tempfile
 
-from live_commentary import get_last_game_id,get_game_content,process_timestamp,get_game_timestamps,get_highlights_for_team
+from live_commentary import get_last_game_id,get_game_content,process_timestamp,get_game_timestamps,get_highlights_for_team,get_basic_player_info
 from email_helper import make_authorized_get_request
 
 from gcs_helper import upload_to_gcs,download_from_gcs
@@ -64,23 +64,18 @@ class personalized_digest_response_model(BaseModel):
     response: str
     gcs_url: str
 
-# Get the credentials JSON string from the environment variable
-creds_json = os.getenv('vertex_ai_service_acc')
 
-# If the credentials are found
-if creds_json:
-    # Create a temporary file to store the credentials
-    with tempfile.NamedTemporaryFile(delete=False, mode='w') as temp_file:
-        temp_file.write(creds_json)
-        temp_file_path = temp_file.name
-        
-    # Set the GOOGLE_APPLICATION_CREDENTIALS environment variable to the path of the temp file
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = temp_file_path
-else:
-    ## Code is for local running using creds file
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./vertex_ai_service_account.json"
+class personalized_digest_response_model(BaseModel):
+    status: str
+    response: str
+    gcs_url: str
+    
 
-vertexai.init(project=json.loads(creds_json)["project_id"], location="asia-south1")
+class summarize_model(BaseModel):
+    response: str
+    language: str
+
+vertexai.init(project=os.getenv("project_id",'mlb-hackathon-448812'), location="us-central1")
 
 safety_settings = {
     HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
@@ -122,36 +117,76 @@ gemini_model_summary = ChatVertexAI(
 system_prompt = SystemMessage(content="You are an MLB content creator, tasked to create personalized digests for fans based on the information provided.")
 
 
+system_prompt_summary = SystemMessage(content="You are an MLB content creator, tasked to summarize player or team info for fans based on the information provided.")
 
 def get_highlights_for_player(player_id,match_id=None):
     last_game_id,last_game_date = get_last_game_id(player_id)
-    content = get_game_content(last_game_id)
+    basic_info = get_basic_player_info(player_id)
+    player_info = basic_info['people'][0]
     
     game_timestamps = get_game_timestamps(last_game_id)
     print("\nGame Timestamps:", len(game_timestamps))
-
-    big_event_pitch_codes = {
+    
+    
+    big_event_pitch_codes = [
         "E", "Z", "X", "D", "Y", "J",  # Run-scoring and play-determining
         "H", "I", "VB",                # Hit-by-pitch & intentional walks
         "1", "2", "3", "+1", "+2", "+3",  # Pickoff attempts
         "VP", "VC", "VS", "AC", "AB"   # Rule violations
-    }
+    ]
 
     # Run in parallel and store results
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        results = list(executor.map(process_timestamp, game_timestamps))
+        results = list(executor.map(process_timestamp, [last_game_id]*len(game_timestamps),game_timestamps))
 
     # Convert results to a DataFrame
     df = pd.DataFrame(results)
-
+    filtered_df = []
+    filtered_df = df[(df['batter_id'] == int(player_id)) | (df['pitcher_id'] == int(player_id)) & (df['pitch_code'].isin(big_event_pitch_codes))]
+    play_id = max(filtered_df['play_id'])
+    filtered_df = filtered_df.drop(columns=['play_id'])
+    
     # Display the DataFrame
-    print(df)
+    if filtered_df is []:
+        print(filtered_df)
     
     
+    return {
+        'player_name': player_info['fullName'],
+        'first_name': player_info['firstName'],
+        'last_name' : player_info['lastName'],
+        'age' : player_info['currentAge'],
+        'position' : player_info['primaryPosition']['name'],
+        'timestamp_df': df.to_string(),
+        'playId': play_id
+    }
+
+
+@app.post("/summarize/",response_model=summarize_model)
+async def personalized_digest(input: summarize_model,username: str = Depends(get_current_username)):
     
+    summarize_prompt = f"Summarize this info {input.response}, in this language: {input.language}"
     
+    human_prompt = HumanMessage(
+            content=[
+                {"type": "text",
+                "text": summarize_prompt
+                }
+            ],
+        )
     
-    pass
+    combined_prompt = [
+        system_prompt_summary,
+        human_prompt
+    ]
+    
+    response = gemini_model_summary.invoke(combined_prompt)
+    
+    return {
+        "response": response.content,
+        "language": input.language
+    }
+
 
 
 @app.post("/personalized_digest/",response_model=personalized_digest_response_model)
@@ -176,12 +211,16 @@ async def personalized_digest(input: personalized_digest_input_model,username: s
     if playerId != "":
         player_details = get_highlights_for_player(playerId)
         personalized_prompt = f"""
-        You are tasked to create a fresh new digest for {firstName} {familyName}, a fan of MLB team {player_details['team_name']} ({player_details['team_abbreviation']})
         
-        The digest is based on their latest game where home team was {player_details['home_team']} and away team {player_details['away_team']}
+        You are tasked to create a fresh new digest for {firstName} {familyName}, a fan of MLB Player {player_details['player_name']}, position {player_details['position']},current age {player_details['age']}
         
-        Context for the digest: {player_details['headline']} , {player_details['body']} 
+        Give the all the output in this language: {language}
+        
+        The digest is based on their latest game where the timestamped event details are in this dataframe :
+        {player_details['timestamp_df']}
         """
+        image_url = ""
+        play_id = player_details["playId"]
         
     if teamId != "":
         team_details = get_highlights_for_team(teamId)
@@ -194,6 +233,8 @@ async def personalized_digest(input: personalized_digest_input_model,username: s
         Context for the digest: {team_details['headline']} , {team_details['body_content']} 
         Give the all the output in this language: {language}
         """
+        image_url = team_details['primary_image_url']
+        play_id = ""
         
     
     
@@ -216,14 +257,16 @@ async def personalized_digest(input: personalized_digest_input_model,username: s
     print(list_response)
     
     # Step 4: download and upload image/video code
-    image_url = team_details['primary_image_url']
-    # Example usage
-    source_file_path = "./images/image.jpg"  # Replace with the local file path
-    download_image(image_url,source_file_path)
-    
-    bucket_name = "veo-testing-ssl"  # Replace with your GCS bucket name
-    destination_blob_name = "images/image.jpg"  # The name/path you want the file to have in GCS
-    gcs_url,blob_name = upload_to_gcs(bucket_name, source_file_path, destination_blob_name)
+    if image_url != "":
+        # Example usage
+        source_file_path = "./image.jpg"  # Replace with the local file path
+        download_image(image_url,source_file_path)
+        
+        bucket_name = "mlb-objects"  # Replace with your GCS bucket name
+        destination_blob_name = "images/image.jpg"  # The name/path you want the file to have in GCS
+        gcs_url,blob_name = upload_to_gcs(bucket_name, source_file_path, destination_blob_name)
+    else:
+        destination_blob_name = blob_name = ""
     
     
     
@@ -239,7 +282,8 @@ async def personalized_digest(input: personalized_digest_input_model,username: s
         "body_header":  list_response[0]["personalized_message_header"], 
         "body_content": list_response[0]["personalized_digest"], 
         "language": language, 
-        "media_url": destination_blob_name
+        "media_url": destination_blob_name,
+        "play_id": play_id
     }
     
     

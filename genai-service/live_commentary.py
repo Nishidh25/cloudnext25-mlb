@@ -1,4 +1,3 @@
-
 import requests
 import gzip
 import json
@@ -190,7 +189,6 @@ def get_last_game_id(person_id):
     except (KeyError, ValueError) as e:
         print(f"Error processing API response: {e}")
         return None
-    
 
 def get_game_content(game_pk):
     """
@@ -264,9 +262,9 @@ def get_schedule_with_highlights(date):
     response.raise_for_status()
     return response.json()
 
-def process_timestamp(timestamp):
+def process_timestamp(game_pk,timestamp):
     """Fetch and process live game feed for a given timestamp."""
-    time_feed = get_live_game_feed(game_pk_example, timecode=timestamp)
+    time_feed = get_live_game_feed(game_pk, timecode=timestamp)
     current_play = time_feed['liveData']['plays']['currentPlay']
     
     result = current_play.get('result', {})
@@ -305,6 +303,8 @@ def process_timestamp(timestamp):
     pitch_type = last_pitch.get('details', {}).get('type', {}).get('description', None)
     pitch_speed = last_pitch.get('pitchData', {}).get('startSpeed', None)
     pitch_call = last_pitch.get('details', {}).get('call', {}).get('description', None)
+    pitch_code = last_pitch.get('details', {}).get('call', {}).get('code', None)
+    play_id = last_pitch.get('playId', {})
 
     return {
         "timestamp": timestamp,
@@ -327,7 +327,9 @@ def process_timestamp(timestamp):
         "pitcher_hand": pitcher_hand,
         "pitch_type": pitch_type,
         "pitch_speed": pitch_speed,
-        "pitch_call": pitch_call
+        "pitch_call": pitch_call,
+        "pitch_code": pitch_code,
+        "play_id": play_id
     }
 
 
@@ -401,7 +403,7 @@ def extract_player_stats(data):
     stats['totalBases'] = hitting.get('totalBases', 0)
     stats['plateAppearances'] = hitting.get('plateAppearances', 0)
 
-    
+
     # Extract pitching stats
     pitching = next((split['stat'] for split in data.get('stats', [{}])[0].get('splits', []) if split.get('group') == 'pitching'), {})
     stats['gamesStarted'] = pitching.get('gamesStarted', 0)
@@ -479,84 +481,23 @@ def get_highlights_for_team(team_id,match_id=None):
     }
 
 
-if __name__ == '__main__':
-    
-    get_team_basic_details(141)
-    
-    exit(0)
-    print(get_latest_game_pk(141))
-    team_id_example = 141  # Example: Toronto Blue Jays
-    team_data = get_last_game_for_team(team_id_example)
-    print(team_data)
-    exit(0)
-    player_id = 605113 #656555  # Example player ID
-    
-    last_game_id,date_example = get_last_game_id(player_id)
-    
-    stats = get_game_stats(game_pk = 745323, person_id=player_id)
-    player_stats = extract_player_stats(stats)
-    print(player_stats)
-    exit(0)
-    
-    last_game_id,date_example = get_last_game_id(player_id)
-    if last_game_id:
-        print(f"The last game ID for player {player_id} is: {last_game_id}")
-    
-    game_pk_example = last_game_id # Replace with a valid game_pk
+def get_basic_player_info(person_id):
+    """
+    Retrieves basic player information using the MLB Stats API.
+
+    Args:
+        person_id (int): The unique identifier for the player.
+
+    Returns:
+        dict: A dictionary containing basic player information, or None if an error occurs.
+    """
+    base_url = "https://statsapi.mlb.com/api/v1"
+    person_url = f"{base_url}/people/{person_id}"
     try:
-        
-        # Get game content (including highlights)
-        content = get_game_content(game_pk_example)
-        print("Game Content (including Highlights):")
-        
-        print(content['editorial']['recap']['mlb'])
-        
-        
-        headline = content['editorial']['recap']['mlb']['headline']
-        seotitle =  content['editorial']['recap']['mlb']['seoTitle']
-        blurb = content['editorial']['recap']['mlb']['blurb']
-        image_title = content['editorial']['recap']['mlb']['image']['title']
-        primary_image_url = content['editorial']['recap']['mlb']['image']['cuts'][0]['src']
-        blurb = content['editorial']['recap']['mlb']['body']
-        
-        game_timestamps = get_game_timestamps(game_pk_example)
-        print("\nGame Timestamps:", len(game_timestamps))
-
-        big_event_pitch_codes = {
-            "E", "Z", "X", "D", "Y", "J",  # Run-scoring and play-determining
-            "H", "I", "VB",                # Hit-by-pitch & intentional walks
-            "1", "2", "3", "+1", "+2", "+3",  # Pickoff attempts
-            "VP", "VC", "VS", "AC", "AB"   # Rule violations
-        }
-
-        # Run in parallel and store results
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            results = list(executor.map(process_timestamp, game_timestamps))
-
-        # Convert results to a DataFrame
-        df = pd.DataFrame(results)
-
-        # Display the DataFrame
-        print(df)
-        
-        #print(time_feed['liveData']['plays'])
-        exit(0)
-        
-
-        #Get live game feed (commentary)
-        live_feed = get_live_game_feed(game_pk_example, timecode=game_timestamps[0])#example timecode
-        print("\nLive Game Feed (Commentary):")
-        print(live_feed)
-
-        # Get play by play
-        #play_by_play = get_game_play_by_play(game_pk_example, timecode="20240330_191847") #example timecode
-        #print("\nGame Play by Play:")
-        #print(json.dumps(play_by_play, indent=2))
-
-        # Get schedule with highlights
-        #schedule_with_highlights = get_schedule_with_highlights(date_example)
-        #print("\nSchedule with Highlights:")
-        #print(json.dumps(schedule_with_highlights, indent=2))
-
+        person_response = requests.get(person_url)
+        person_response.raise_for_status()  # Raise an exception for HTTP errors
+        person_data = person_response.json()
+        return person_data
     except requests.exceptions.RequestException as e:
-        print(f"Error during API request: {e}")
+        print(f"Error fetching basic player info: {e}")
+        return None

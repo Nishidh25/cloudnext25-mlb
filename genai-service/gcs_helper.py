@@ -2,22 +2,8 @@ from google.cloud import storage
 import os
 import tempfile
 
-
-# Get the credentials JSON string from the environment variable
-creds_json = os.getenv('vertex_ai_service_acc')
-
-# If the credentials are found
-if creds_json:
-    # Create a temporary file to store the credentials
-    with tempfile.NamedTemporaryFile(delete=False, mode='w') as temp_file:
-        temp_file.write(creds_json)
-        temp_file_path = temp_file.name
-        
-    # Set the GOOGLE_APPLICATION_CREDENTIALS environment variable to the path of the temp file
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = temp_file_path
-
 # Initialize the Google Cloud Storage client
-storage_client = storage.Client.from_service_account_json(temp_file_path)
+storage_client = storage.Client()
 
 def upload_to_gcs(bucket_name, source_file_path, destination_blob_name):
 
