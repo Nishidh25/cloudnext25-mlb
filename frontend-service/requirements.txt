@@ -1,0 +1,13 @@
+gradio
+langchain
+langchain-google-vertexai
+fastapi
+configparser
+fastapi[standard]
+Authlib
+itsdangerous
+Pillow
+google-cloud-secret-manager
+SQLAlchemy
+Werkzeug
+cloud-sql-python-connector[pg8000]

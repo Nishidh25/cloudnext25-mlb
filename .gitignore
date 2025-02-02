@@ -1,0 +1,5 @@
+__pycache__
+*.json
+deploy_secrets.sh
+veo_2_video_generation.ipynb
+veo_api_helper.py

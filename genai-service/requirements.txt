@@ -1,0 +1,7 @@
+mediapy
+fastapi
+fastapi[standard]
+pandas
+langchain
+langchain-google-vertexai
+vertexai

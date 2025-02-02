@@ -1,0 +1,3 @@
+gcloud builds submit --tag asia-south1-docker.pkg.dev/mlb-hackathon-448812/mlb-ai-service/mlb-frontend-service-api:LATEST
+
+gcloud run deploy mlb-frontend-service --image asia-south1-docker.pkg.dev/mlb-hackathon-448812/mlb-ai-service/mlb-frontend-service-api:LATEST --region asia-south1 --platform managed --allow-unauthenticated --vpc-connector vpc-for-sql-run --update-secrets=GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID:latest,GOOGLE_CLIENT_SECRET=GOOGLE_CLIENT_SECRET:latest,instance_connection_name=instance_connection_name:latest,db_user=db_user:latest,db_pass=db_pass:latest,db_name=db_name:latest,SECRET_KEY=SECRET_KEY:latest

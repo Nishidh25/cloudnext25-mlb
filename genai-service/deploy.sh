@@ -1,0 +1,3 @@
+gcloud builds submit --tag asia-south1-docker.pkg.dev/mlb-hackathon-448812/mlb-ai-service/mbl-ai-service-api:LATEST
+
+gcloud run deploy mlb-ai-service-api --image asia-south1-docker.pkg.dev/mlb-hackathon-448812/mlb-ai-service/mbl-ai-service-api:LATEST --region asia-south1 --platform managed --allow-unauthenticated --vpc-connector vpc-for-sql-run --update-secrets=api_username=api_username:latest,api_password=api_password:latest,email_service_url=email_service_url:latest,vertex_ai_service_acc=vertex_ai_service_acc:latest
