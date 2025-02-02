@@ -30,9 +30,8 @@ Challenge 2: Personalized Fan Highlights: Build a system that allows fans to sel
 
 ## Designing the Google Cloud Architecture (Selecting "right" Tools, Methodology)
 The whole point is to design reliable and scalable solution
-
-Diagram: 
-
+ 
+![Solution Architecture](/images/cloud_architecture.png)
 
 Microservice Architecture 
 Service 1: Frontend for the MLB (using Gradio for Quick development in python). Audio/Text based inputs as well
