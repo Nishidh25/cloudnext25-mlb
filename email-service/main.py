@@ -55,7 +55,8 @@ def send_message(service, sender, receiver, subject, first_name, last_name, body
           fan_community = "Actualizaciones de la Comunidad de Fans"
           fan_community_description = "¡Únete a la conversación con otros fanáticos! Mira las últimas discusiones, encuestas y envíos de los fans."
           fan_community_button = "Unirse a la Conversación"
-          
+          clips_of_play = "Ver clips de la obra"
+
           visit_mlb = "Visita Mi MLB"
           
           footer_modify = "Estás recibiendo este correo electrónico porque te registraste en nuestro MLB Fan Digest. Si deseas cancelar la suscripción o modificarla "
@@ -66,7 +67,8 @@ def send_message(service, sender, receiver, subject, first_name, last_name, body
           fan_community = "ファンコミュニティの更新情報"
           fan_community_description = "他のファンとの会話に参加しよう！最新のディスカッション、投票、ファンからの投稿をチェックしてみてください。"
           fan_community_button = "ディスカッションに参加する"
-          
+          clips_of_play = "劇のクリップを見る"
+
           visit_mlb = "私のMLBを訪問"
           
           footer_modify = "このメールは、MLB Fan Digestに登録したために受信しています。購読を解除したり、設定を変更したりするには "
@@ -77,6 +79,7 @@ def send_message(service, sender, receiver, subject, first_name, last_name, body
           fan_community = "Fan Community Updates"
           fan_community_description = "Join the conversation with other fans! Check out the latest discussions, polls, and fan submissions."
           fan_community_button = "Join the Discussion"
+          clips_of_play = "View Clips of the play"
           
           visit_mlb = "Visit My MLB"
 
@@ -176,7 +179,7 @@ def send_message(service, sender, receiver, subject, first_name, last_name, body
               <h2>{body_header}</h2>
               {f'<div class="image-container"><img src="cid:my_media" alt="Highlight" /></div>' if media_path else ''}
               <p>{body_content}</p>
-              {f"<div style='text-align: center;'><a href='{single_play_url}' class='cta-button'>View Clips of the play</a></div>" if single_play_url else''}
+              {f"<div style='text-align: center;'><a href='{single_play_url}' class='cta-button'>{clips_of_play}</a></div>" if single_play_url else''}
               <h2>{fan_community}</h2>
               <p>{fan_community_description}</p>
               <div style="text-align: center;">
