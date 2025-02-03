@@ -13,7 +13,8 @@ from urllib.parse import urlparse, urlunparse
 from mlb_api_wrapper import get_teams,get_team_roster,get_team_logo_url,get_player_headshot_from_url,get_team_basic_details,get_player_details_page_data
 from database import session
 from database.orm import orm_create_user,orm_subscribe_user
-
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
 from genai_service_helper import call_personalized_digest,call_summarize
 
 
@@ -42,6 +43,8 @@ app.add_middleware(
     TrustedHostMiddleware,
     allowed_hosts=["*"], #"*.nishidh.online"
 )
+
+
 
 #app.add_middleware(HTTPSRedirectMiddleware)
 
@@ -141,6 +144,19 @@ def get_health() -> HealthCheck:
 
 
 
+# Mount the static directory to serve static files (including HTML)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Define a route to serve the HTML file from the static directory
+@app.get("/vertexsearch", response_class=HTMLResponse)
+async def get_html(username = Depends(get_user)):
+    html_file_path = os.path.join("static", "index.html")
+    if os.path.exists(html_file_path):
+        with open(html_file_path, "r") as file:
+            content = file.read()
+        return HTMLResponse(content=content)
+    return HTMLResponse("HTML file not found.", status_code=404)
+
 def get_user_email(request: gr.Request):
     return request.username
 
@@ -182,13 +198,14 @@ with gr.Blocks(fill_width=True,js=js_login,title="My MLB") as demo:
                 gr.HTML("""<div id='logout_button' style='display:block; float: right;></div>""")
                 greeting= gr.Markdown(elem_id="logout_button")
                 #user_info = gr.components.HTML()
+                faq_btn=gr.Button(" | MLB FAQ", link="/vertexsearch",icon="./images/search.png",min_width=150,scale=0)
                 logout_btn=gr.Button("|  Logout", link="/logout",elem_id="logout_button",icon="./images/logout.png",min_width=150,scale=0)
     
     with gr.Tab("Subscribe"):
         with gr.Row() as player_selector:
             with gr.Column() as sideBar:
                 intro = gr.Markdown("#### 1. Start Selecting these options to personalize your fan digest")
-                selection_season = gr.Dropdown(choices=['2023','2024','2025'], label="Season dropdown",value=[''])
+                selection_season = gr.Dropdown(choices=['2023','2024','2025'], label="Season",value=[''])
                 selection_team = gr.Dropdown(choices=[], label="Select your Team")
                 selection_player = gr.Dropdown([],label="Select your player")
                 selection_language = gr.Dropdown(choices=['English','Spanish','Japanese'], label="Select your language",value='English')
@@ -222,7 +239,7 @@ with gr.Blocks(fill_width=True,js=js_login,title="My MLB") as demo:
             with gr.Column() as team_details:
                 intro_team = gr.Markdown("#### 2. Subscribe to get gmail digests for this team")
                 with gr.Row():
-                    team_logo = gr.Image(scale=0.25,show_label=False,show_download_button=False,show_fullscreen_button=False, height= 200,width=200)
+                    team_logo = gr.Image(value = "./images/team_placeholder.png",scale=0.25,show_label=False,show_download_button=False,show_fullscreen_button=False, height= 200,width=200)
                     team_details = gr.Markdown("""## Team Details
                                                Select a team from the dropdown to start viewing their info
                                                """)
@@ -232,7 +249,7 @@ with gr.Blocks(fill_width=True,js=js_login,title="My MLB") as demo:
             with gr.Column() as player_details:
                 intro_player = gr.Markdown("#### 3. Subscribe to get gmail digests for this player")
                 with gr.Row():
-                    player_headshot = gr.Image(scale=0.25,show_label=False,show_download_button=False,show_fullscreen_button=False, height= 200,width=200)
+                    player_headshot = gr.Image(value = "./images/team_placeholder.png",scale=0.25,show_label=False,show_download_button=False,show_fullscreen_button=False, height= 200,width=200)
                     player_details = gr.Markdown(""" ## Player Details
                                                 Select a player from the dropdown to start viewing his stats 
                                                 """)
@@ -256,7 +273,12 @@ with gr.Blocks(fill_width=True,js=js_login,title="My MLB") as demo:
             return gr.update(value = get_player_headshot_from_url(person_id))    
         
         def update_image_url_to_default():
-            return gr.update(value = None)   
+            return gr.update(value = "./images/team_placeholder.png")   
+        
+        def update_markdown_to_default():
+            return gr.update(value = """ ## Player Details
+                                                Select a player from the dropdown to start viewing his stats 
+                                                """)  
         
         def update_get_team_basic_details(team_id):
             team_name,team_abbreviation,team_location,manager = get_team_basic_details(team_id)
@@ -282,6 +304,8 @@ with gr.Blocks(fill_width=True,js=js_login,title="My MLB") as demo:
                 update_get_team_basic_details,[selection_team],team_details
             ).then(
                 update_image_url_to_default,None,player_headshot
+            ).then(
+                update_markdown_to_default,None,player_details
             )
 
         selection_player.input(

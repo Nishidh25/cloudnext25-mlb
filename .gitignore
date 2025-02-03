@@ -3,3 +3,4 @@ __pycache__
 deploy_secrets.sh
 veo_2_video_generation.ipynb
 veo_api_helper.py
+index.html

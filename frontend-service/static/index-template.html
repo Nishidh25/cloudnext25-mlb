@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Widget</title>
+</head>
+<body>
+    <!-- Widget JavaScript bundle -->
+<script src="https://cloud.google.com/ai/gen-app-builder/client?hl=en_US"></script>
+
+<!-- Search widget element is not visible by default -->
+<gen-search-widget
+  configId="YOUR Widget ID Here"
+  triggerId="searchWidgetTrigger">
+</gen-search-widget>
+
+<!-- Element that opens the widget on click. It does not have to be an input -->
+<input placeholder="Search here" id="searchWidgetTrigger" />
+
+<script>
+  window.onload = function() {
+    // Trigger the click event to open the widget when the page loads
+    document.getElementById('searchWidgetTrigger').click();
+  };
+</script>
+
+</body>
+</html>
