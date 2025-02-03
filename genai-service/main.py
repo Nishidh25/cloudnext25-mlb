@@ -12,7 +12,7 @@ import json
 import vertexai
 import tempfile
 
-from live_commentary import get_last_game_id,get_game_content,process_timestamp,get_game_timestamps,get_highlights_for_team,get_basic_player_info
+from live_commentary import get_last_game_id,get_game_content,process_timestamp,get_game_timestamps,get_highlights_for_team,get_basic_player_info,is_not_json
 from email_helper import make_authorized_get_request
 
 from gcs_helper import upload_to_gcs,download_from_gcs
@@ -57,6 +57,7 @@ class personalized_digest_input_model(BaseModel):
     playerId:str
     teamId:str
     language:str
+    persona:str
 
 
 class personalized_digest_response_model(BaseModel):
@@ -64,16 +65,11 @@ class personalized_digest_response_model(BaseModel):
     response: str
     gcs_url: str
 
-
-class personalized_digest_response_model(BaseModel):
-    status: str
-    response: str
-    gcs_url: str
-    
 
 class summarize_model(BaseModel):
     response: str
     language: str
+    persona:str
 
 vertexai.init(project=os.getenv("project_id",'mlb-hackathon-448812'), location="us-central1")
 
@@ -143,6 +139,8 @@ def get_highlights_for_player(player_id,match_id=None):
     df = pd.DataFrame(results)
     filtered_df = []
     filtered_df = df[(df['batter_id'] == int(player_id)) | (df['pitcher_id'] == int(player_id)) & (df['pitch_code'].isin(big_event_pitch_codes))]
+    # Filter out rows where `play_id` is JSON-like (string)
+    filtered_df = filtered_df[filtered_df['play_id'].apply(is_not_json)]
     play_id = max(filtered_df['play_id'])
     filtered_df = filtered_df.drop(columns=['play_id'])
     
@@ -165,7 +163,11 @@ def get_highlights_for_player(player_id,match_id=None):
 @app.post("/summarize/",response_model=summarize_model)
 async def personalized_digest(input: summarize_model,username: str = Depends(get_current_username)):
     
-    summarize_prompt = f"Summarize this info {input.response}, in this language: {input.language}"
+    summarize_prompt = f"""
+    Give your output in this language: {input.language}
+    The MLB fans persona is: {input.persona}
+    Summarize this info: {input.response}
+    """
     
     human_prompt = HumanMessage(
             content=[
@@ -184,7 +186,8 @@ async def personalized_digest(input: summarize_model,username: str = Depends(get
     
     return {
         "response": response.content,
-        "language": input.language
+        "language": input.language,
+        "persona": input.persona
     }
 
 
@@ -200,6 +203,7 @@ async def personalized_digest(input: personalized_digest_input_model,username: s
     playerId = input.playerId
     teamId = input.teamId
     language = input.language
+    persona = input.persona
     
     
     
@@ -213,7 +217,7 @@ async def personalized_digest(input: personalized_digest_input_model,username: s
         personalized_prompt = f"""
         
         You are tasked to create a fresh new digest for {firstName} {familyName}, a fan of MLB Player {player_details['player_name']}, position {player_details['position']},current age {player_details['age']}
-        
+        The fans Persona is {persona}, do not mention this in the Output, use his persona to personalise the digest.
         Give the all the output in this language: {language}
         
         The digest is based on their latest game where the timestamped event details are in this dataframe :
@@ -227,11 +231,11 @@ async def personalized_digest(input: personalized_digest_input_model,username: s
         
         personalized_prompt = f"""
         You are tasked to create a fresh new digest for {firstName} {familyName}, a fan of MLB team {team_details['team_name']} ({team_details['team_abbreviation']})
-        
+        The fans Persona is {persona}, do not mention this in the output, use his persona to personalise the digest.
         The digest is based on their latest game where home team was {team_details['home_team']} and away team {team_details['away_team']}
-        
-        Context for the digest: {team_details['headline']} , {team_details['body_content']} 
         Give the all the output in this language: {language}
+
+        Context for the digest: {team_details['headline']} , {team_details['body_content']} 
         """
         image_url = team_details['primary_image_url']
         play_id = ""

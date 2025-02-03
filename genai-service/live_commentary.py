@@ -28,15 +28,18 @@ def get_latest_game_pk(team_id,season='2024'):
         game_dates = []
         for date_info in data['dates']:
             for game in date_info['games']:
-                match = {
-                    'home_team': game['teams']['home']['team']['name'],
-                    'away_team': game['teams']['away']['team']['name'],
-                    'date': date_info['date'],
-                    'game_in_series': game['gamesInSeries'],
-                    'gamePk': game['gamePk']
-                }
-                game_dates.append(date_info['date'])
-                matches.append(match)
+                try:
+                    match = {
+                        'home_team': game['teams']['home']['team']['name'],
+                        'away_team': game['teams']['away']['team']['name'],
+                        'date': date_info['date'],
+                        'game_in_series': game['gamesInSeries'],
+                        'gamePk': game['gamePk']
+                    }
+                    game_dates.append(date_info['date'])
+                    matches.append(match)
+                except:
+                    pass
                 
         max_game_date = max(game_dates)
         print(max_game_date)
@@ -501,3 +504,10 @@ def get_basic_player_info(person_id):
     except requests.exceptions.RequestException as e:
         print(f"Error fetching basic player info: {e}")
         return None
+    
+def is_not_json(val):
+    try:
+        json.loads(val)
+        return False  # it's JSON, so return False to exclude it
+    except (TypeError, json.JSONDecodeError):
+        return True  # it's not JSON, so keep it
