@@ -139,9 +139,9 @@ def get_highlights_for_player(player_id,match_id=None):
     df = pd.DataFrame(results)
     filtered_df = []
     filtered_df = df[(df['batter_id'] == int(player_id)) | (df['pitcher_id'] == int(player_id)) & (df['pitch_code'].isin(big_event_pitch_codes))]
-    # Filter out rows where `play_id` is JSON-like (string)
-    filtered_df = filtered_df[filtered_df['play_id'].apply(is_not_json)]
-    play_id = max(filtered_df['play_id'])
+    # Filter out rows where `play_id` is string
+    filtered_df_for_max = filtered_df[filtered_df['play_id'].apply(lambda x: isinstance(x, str))]
+    play_id = max(filtered_df_for_max['play_id'])
     filtered_df = filtered_df.drop(columns=['play_id'])
     
     # Display the DataFrame
