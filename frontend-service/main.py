@@ -14,6 +14,7 @@ from mlb_api_wrapper import get_teams,get_team_roster,get_team_logo_url,get_play
 from database import session
 from database.orm import orm_create_user,orm_subscribe_user
 
+from genai_service_helper import call_personalized_digest,call_summarize
 
 
 ## Fast API wrapped with gradio for security
@@ -149,8 +150,7 @@ def get_user_names(request: gr.Request):
 def get_user_greeting(request: gr.Request):
     first_name, last_name = request.session['user']['given_name'],request.session['user']['family_name']
 
-    return  f"## Welcome {first_name}!"
-
+    return  f"## Welcome to My MLB Digest, {first_name}!"
 
 
 
@@ -170,10 +170,11 @@ js_login="""
         }
 """
 
-with gr.Blocks(fill_width=True,theme='gradio/soft',js=js_login,title="MLB PH") as demo:
+with gr.Blocks(fill_width=True,js=js_login,title="My MLB") as demo:
     with gr.Row(variant="Headers",visible=True,equal_height=True) as header:
         with gr.Column():
-            gr.Markdown("# MLB Highlights")
+            welcome = gr.Markdown("# Welcome to My MLB Digest")
+            demo.load(get_user_greeting, outputs=welcome)
             #gr.Image('./src/logo_v2.png',container=False,show_download_button=False,height=0, width=150,scale=0,min_width=300,show_fullscreen_button=False)
         
         with gr.Column():
@@ -181,57 +182,70 @@ with gr.Blocks(fill_width=True,theme='gradio/soft',js=js_login,title="MLB PH") a
                 gr.HTML("""<div id='logout_button' style='display:block; float: right;></div>""")
                 greeting= gr.Markdown(elem_id="logout_button")
                 #user_info = gr.components.HTML()
-                demo.load(get_user_greeting, outputs=greeting)
-                logout_btn=gr.Button("Logout", link="/logout",elem_id="logout_button",min_width=150,scale=0)
+                logout_btn=gr.Button("|  Logout", link="/logout",elem_id="logout_button",icon="./images/logout.png",min_width=150,scale=0)
     
     with gr.Tab("Subscribe"):
         with gr.Row() as player_selector:
-            selection_season = gr.Dropdown(choices=['2024','2025'], label="Team dropdown",value=[])
-            selection_team = gr.Dropdown(choices=[], label="Team dropdown")
-            selection_player = gr.Dropdown([],label="Player dropdown")
+            with gr.Column() as sideBar:
+                intro = gr.Markdown("#### 1. Start Selecting these options to personalize your fan digest")
+                selection_season = gr.Dropdown(choices=['2023','2024','2025'], label="Season dropdown",value=[''])
+                selection_team = gr.Dropdown(choices=[], label="Select your Team")
+                selection_player = gr.Dropdown([],label="Select your player")
+                selection_language = gr.Dropdown(choices=['English','Spanish','Japanese'], label="Select your language",value='English')
+                selection_persona = gr.Dropdown(choices= ['None',"The Stat Buff","The Superstitious Fan","The Nostalgic Fan","The Fair-Weather Fan","The Ultimate Tailgater","The Hardcore Loyalist","The Young Enthusiast","The Millennial Die-Hard","The College Student Fan"], label="What persona are you?",allow_custom_value=True,interactive=True)
+                personalize_data = gr.Button("Personalize using Gemini 2.0", variant="huggingface", icon = './images/google-gemini-icon.jpg')
+                
             
-            def get_teams_from_season(season):
-                teams_data = get_teams(season=season,active_status="Y",sport_id=1)
-                print(teams_data)
-                if teams_data:
-                    print(f"Teams in the {season} season:")
-                    teams = teams_data.get('teams', [])
-                    team_dict = [(team.get('name'),team.get('id')) for team in teams]
-                return gr.update(choices=team_dict) 
+                def get_teams_from_season(season):
+                    teams_data = get_teams(season=season,active_status="Y",sport_id=1)
+                    print(teams_data)
+                    if teams_data:
+                        print(f"Teams in the {season} season:")
+                        teams = teams_data.get('teams', [])
+                        team_dict = [(team.get('name'),team.get('id')) for team in teams]
+                    return gr.update(choices=team_dict) 
+                
+                def get_players_from_teams_season(season,team_id):
+                    roster_data = get_team_roster(team_id, season)
+                    if roster_data:
+                        print(f"Roster for team ID {team_id} in {season}:")
+                        roster = roster_data.get('roster', [])
+                        player_dict = [(player.get('person', {}).get('fullName', 'N/A'), player.get('person', {}).get('id', 'N/A')) for player in roster]
+                    else:
+                        print("Could not retrieve roster information.")
+                        
+                    print(player_dict)
+                    return gr.update(choices=player_dict) 
             
-            def get_players_from_teams_season(season,team_id):
-                roster_data = get_team_roster(team_id, season)
-                if roster_data:
-                    print(f"Roster for team ID {team_id} in {season}:")
-                    roster = roster_data.get('roster', [])
-                    player_dict = [(player.get('person', {}).get('fullName', 'N/A'), player.get('person', {}).get('id', 'N/A')) for player in roster]
-                else:
-                    print("Could not retrieve roster information.")
-                    
-                print(player_dict)
-                return gr.update(choices=player_dict) 
             
-            
-        with gr.Row() as details_section:
+
             with gr.Column() as team_details:
+                intro_team = gr.Markdown("#### 2. Subscribe to get gmail digests for this team")
                 with gr.Row():
                     team_logo = gr.Image(scale=0.25,show_label=False,show_download_button=False,show_fullscreen_button=False, height= 200,width=200)
-                    team_details = gr.Markdown("## Team Details")
+                    team_details = gr.Markdown("""## Team Details
+                                               Select a team from the dropdown to start viewing their info
+                                               """)
                 with gr.Row():
-                    subscribe_to_team = gr.Button("Subscribe to Team", variant="primary")
+                    subscribe_to_team = gr.Button("Subscribe to Team Digest", variant="primary",icon = './images/google-gemini-icon.jpg')
+            
             with gr.Column() as player_details:
+                intro_player = gr.Markdown("#### 3. Subscribe to get gmail digests for this player")
                 with gr.Row():
                     player_headshot = gr.Image(scale=0.25,show_label=False,show_download_button=False,show_fullscreen_button=False, height= 200,width=200)
-                    player_details = gr.Markdown("## Player Details")
+                    player_details = gr.Markdown(""" ## Player Details
+                                                Select a player from the dropdown to start viewing his stats 
+                                                """)
                 with gr.Row():
-                    subscribe_to_player = gr.Button("Subscribe to Player", variant="primary")
-                
-        with gr.Row():            
-            text_email = gr.Textbox(visible=False)
-            user_first_name = gr.Textbox(visible=False)
-            user_last_name = gr.Textbox(visible=False)
-            demo.load(get_user_email, outputs=text_email)
-            demo.load(get_user_names, outputs=[user_first_name,user_last_name])
+                    subscribe_to_player = gr.Button("Subscribe to Player Digest", variant="primary",icon = './images/google-gemini-icon.jpg')
+            
+                with gr.Row():            
+                    text_email = gr.Textbox(visible=False)
+                    user_first_name = gr.Textbox(visible=False)
+                    user_last_name = gr.Textbox(visible=False)
+                    demo.load(get_user_email, outputs=text_email)
+                    demo.load(get_user_names, outputs=[user_first_name,user_last_name])
+                    empty_textbox = gr.Textbox("",visible=False)
         
         selection_season.input(get_teams_from_season, selection_season, selection_team)
         
@@ -281,13 +295,27 @@ with gr.Blocks(fill_width=True,theme='gradio/soft',js=js_login,title="MLB PH") a
             orm_subscribe_user(session,text_email, user_first_name, user_last_name, str(selection_team), str(selection_player))
             gr.Info(f"You have subscribed to this Team/Player. You will start receiving the emails on your logged in email id:{text_email}")
             
-        subscribe_to_team.click(update_orm_subscribe_user, inputs=[text_email, user_first_name, user_last_name, selection_team, selection_player])
-        
+        subscribe_to_team.click(
+            update_orm_subscribe_user, inputs=[text_email, user_first_name, user_last_name, selection_team, selection_player]
+            ).then(
+                call_personalized_digest, inputs=[text_email, user_first_name,user_last_name, empty_textbox, selection_team, selection_language,selection_persona],outputs=None
+            )
+            
+        subscribe_to_player.click(
+            update_orm_subscribe_user, inputs=[text_email, user_first_name, user_last_name, selection_team, selection_player]
+            ).then(
+                call_personalized_digest, inputs=[text_email, user_first_name,user_last_name, selection_player, empty_textbox, selection_language,selection_persona],outputs=None
+            )
+            
+        personalize_data.click(
+            call_summarize,inputs=[team_details,selection_language,selection_persona], outputs=[team_details]
+        ).then(
+            call_summarize,inputs=[player_details,selection_language,selection_persona], outputs=[player_details]
+        )
     with gr.Tab("View Subscriptions"):
         gr.Markdown("## Your Subscriptions will appear here")
         #create_user = orm_create_user(session) 
         
-
 
 
 css_login="""
@@ -302,20 +330,33 @@ h5 {
     display:block;
 }
 #loginsso {
-  height: 64px;
-  background-color: black;
+  height: 50px; /* Adjust to match the Google login button size */
+  background:#4285F4; /* Google colors gradient */
   color: white;
   text-align: center;
-  display: inline-block;
-  line-height: 64px; /* Vertically centers text if the height is fixed */
-  vertical-align: middle; /* Align with inline content if needed */
-  padding-top: 0px; /* Adjust the padding as needed */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px; /* Rounded corners */
+  padding: 0 20px; /* Horizontal padding */
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer; /* Makes it clickable */
+  border: none; /* Remove any default border */
 }
+
 #loginsso img {
-    text-align: center;
-    display: inline-block;
-    vertical-align: middle;
-    transform: scale(1.2);
+  width: 24px; /* Adjust icon size */
+  height: 24px;
+  margin-right: 10px; /* Space between the icon and text */
+  vertical-align: middle;
+}
+#logo {
+    display: flex;
+    justify-content: center;  /* Horizontally center the image */
+    align-items: center;      /* Vertically center the image */
+    width: 100%;              /* Ensure the div takes up the full width */
+    height: 100%;             /* Ensure the div takes up the full height */
 }
 """
 
@@ -325,32 +366,29 @@ js_d="""
         }
 """
 
-with gr.Blocks(fill_width=True,css=css_login,theme='gradio/soft',js=js_login,title="MLB PH") as signin:
+with gr.Blocks(fill_width=True,css=css_login,js=js_login,title="My MLB") as signin:
     with gr.Row():
         space= gr.HTML("""<br><br><br><br>""")  
     with gr.Row():
         with gr.Column(scale=1):
             pass
         with gr.Column(variant="panel",scale=2):
-            gr.Markdown("""<h1 style="font-family: 'Roboto Mono', monospace;">MLB Personalized Highlights</h1>""")
+            gr.Markdown("""<h1 style="font-family: 'Roboto Mono', monospace;">My MLB</h1>""")
+            gr.Markdown("""<h5 style="font-family: 'Roboto Mono', monospace;">Your One Stop for Personalized Digests</h5>""")
             
-            gr.HTML("""<div id='logo' style='display:block; margin:auto; width:150px;'></div>""")
-            gr.Image('./src/logo_v2.png',container=False,show_download_button=False,height=0, width=150,scale=0,min_width=300,show_fullscreen_button=False,elem_id='logo')
+            #gr.HTML("""<div id='logo' style='display:block; margin:auto; width:150px;text-align: center;'></div>""")
+            gr.Image('./images/cloud_x_mlb_logo.png',container=False,show_download_button=False,show_fullscreen_button=False,elem_id='logo')
 
-            space= gr.HTML("""<br><br>""") 
-            
         with gr.Column(scale=1):
             pass
     with gr.Row():
         with gr.Column(scale=1):
             pass
         with gr.Column(scale=2):
-            space= gr.HTML("""<br><br>""") 
-            gr.Markdown('##### Login with Google')
-            gr.Button("Login with SSO", link="/login",icon='./src/ms.jpg',elem_id="loginsso")
+            gr.Button("  Login with Google", link="/login",icon='./images/google.png',elem_id="loginsso")
         with gr.Column(scale=1):
             pass
 
-app = gr.mount_gradio_app(app, signin, path="/signin",allowed_paths=["./src/"])
+app = gr.mount_gradio_app(app, signin, path="/signin",favicon_path='./images/favicon.ico',allowed_paths=["./src/"])
 
-app = gr.mount_gradio_app(app, demo.queue(), path="/home",allowed_paths=["./"],auth_dependency=get_user)
+app = gr.mount_gradio_app(app, demo.queue(), path="/home",allowed_paths=["./"],favicon_path='./images/favicon.ico',auth_dependency=get_user)

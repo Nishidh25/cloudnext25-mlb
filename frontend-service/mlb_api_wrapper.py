@@ -261,7 +261,7 @@ def get_player_details_page_data(player_id):
     player_name = player_info['fullName']
     first_name = player_info['firstName']
     last_name = player_info['lastName']
-    team_name = player_stats['stats'][0]['splits'][0]['team']['name']
+    #team_name = player_stats['stats'][0]['splits'][0]['team']['name']
     birth_date = player_info['birthDate']
     age = player_info['currentAge']
     position = player_info['primaryPosition']['name']
@@ -274,7 +274,7 @@ def get_player_details_page_data(player_id):
 
     # Create a markdown text variable with basic info and important metrics
     markdown_text = f"### Player Profile: {player_name}\n"
-    markdown_text += f"**Position:** {position} | **Team:** {team_name} | **Debut:** {mlb_debut}\n"
+    markdown_text += f"**Position:** {position} | **Debut:** {mlb_debut}\n"
     markdown_text += f"**Birth Date:** {birth_date} | **Age:** {age} | **Height:** {height} | **Weight:** {weight} lbs\n\n"
 
     # Add important stats
