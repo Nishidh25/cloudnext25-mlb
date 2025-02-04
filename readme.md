@@ -5,7 +5,7 @@ Google Cloud x MLB Hackathon Submission:
 Challenge 2: Personalized Fan Highlights: Build a system that allows fans to select team(s), player(s), etc. to follow and create audio, video, and/or text digests that fans could receive on a regular cadence to stay up on the latest highlights and commentary. Ensure your solution supports fans who speak English, Spanish, and Japanese. 
 
 #### Inspiration
-The main inspiration behind this project is to bring fans closer to the game than ever before, creating an experience where every fan feels like the game is specifically tailored to them.
+The main inspiration behind this project is to bring fans closer to the game than ever before, creating an experience where every fan feels like the Highlight is specifically tailored to them.
 
 #### What it does
 This is a web-based solution designed for MLB fans, allowing them to subscribe to teams and players. Based on their personas and preferred languages, they will receive personalized digests that keep them updated on everything they care about.
