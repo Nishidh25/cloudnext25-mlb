@@ -4,13 +4,22 @@ Google Cloud x MLB Hackathon Submission:
 
 Challenge 2: Personalized Fan Highlights: Build a system that allows fans to select team(s), player(s), etc. to follow and create audio, video, and/or text digests that fans could receive on a regular cadence to stay up on the latest highlights and commentary. Ensure your solution supports fans who speak English, Spanish, and Japanese. 
 
-Solution Elevator pitch: 
+#### Inspiration
+The main inspiration behind this project is to bring fans closer to the game than ever before, creating an experience where every fan feels like the game is specifically tailored to them.
+
+#### What it does
+This is a web-based solution designed for MLB fans, allowing them to subscribe to teams and players. Based on their personas and preferred languages, they will receive personalized digests that keep them updated on everything they care about.
+
 
 Get basic details about the team/player in your language and persona
 
 <img src="/images/home_light_theme.png" width="400"/>                             <img src="/images/home_light_theme_japanese.png" width="400"/> 
 
+Sends personalised Email digests/highlights to users of latest game using Gemini 2.0 and Gmail API
+
 <img src="/images/gmail-team_digest_english.png" width="400"/>                    <img src="/images/gmail-team_digest_spanish.png" width="400"/>
+
+Ask about any MLB Rule uisng Vertex AI Agent Builder:
 
 <img src="/images/vertexsearch_mlb_rules.png" width="400"/> 
 
