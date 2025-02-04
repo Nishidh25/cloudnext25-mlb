@@ -57,9 +57,9 @@ Solution Architecture:
 
 The architecture used 3 services, for detail about each service click on their link
 
-- **[Service 1](./frontend-service/readme.md)**: Frontend for the MLB (using Gradio for quick development in Python). Audio/Text-based inputs as well.
-- **[Service 2](./genai-service/readme.md)**: Generating Personalized Highlights using Vertex AI Models (Gemini, VEO, Imagen), which is used to generate highlights based on the user's preference.
-- **[Service 3](./email-service/readme.md)**: [Send personalized digests via email to users (using Gmail API).
+- **[Service 1](./frontend-service/)**: Frontend for the MLB (using Gradio for quick development in Python). Audio/Text-based inputs as well.
+- **[Service 2](./genai-service/)**: Generating Personalized Highlights using Vertex AI Models (Gemini, VEO, Imagen), which is used to generate highlights based on the user's preference.
+- **[Service 3](./email-service/)**: Send personalized digests via email to users (using Gmail API).
 
 
 ## How to deploy/run on your environment
