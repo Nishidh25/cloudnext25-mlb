@@ -13,7 +13,20 @@ Helper functions are defined within the service to interact with the MLB API, re
 
 ---
 
-## API Endpoints
+## How was MLB API Used
+MLB API Data used for getting realtime events, specifically last game events and Articles/Content: (All defined in genai-service/live_commentary.py)
+
+Getting Player Stats "https://statsapi.mlb.com/api/v1/people/{person_id}/stats"
+
+Getting Game Highlights "https://statsapi.mlb.com/api/v1/game/{game_pk}/content" for Team Highlights of last game
+
+Getting Temestamps to get live feed of a game for that timestamp "https://statsapi.mlb.com/api/v1.1/game/{game_pk}/feed/live/timestamps"
+
+Getting Game Live Feed "https://statsapi.mlb.com/api/v1.1/game/{game_pk}/feed/live" for Event level Highlights of last game , which is filtred by player id to get player digest/highlights. PlayId Video is also extracted from these events
+
+
+---
+## Gen AI Service API Endpoints
 
 ### 1. **/summarize/**
 
