@@ -1,5 +1,4 @@
-# Service 2 - Gen AI Service: FastAPI Service Documentation
-
+# Service 2 - Gen AI Service: FastAPI 
 ## Overview
 
 This FastAPI service provides two main functionalities using Vertex AI Gemini 2.0:
