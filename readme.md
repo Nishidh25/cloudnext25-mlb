@@ -70,7 +70,7 @@ The architecture used 3 services, for detail about each service click on their l
 
 - **[Service 1: Frontend Service](./frontend-service/)**: Frontend for the MLB (using Gradio for quick development in Python). Audio/Text-based inputs as well.
 - **[Service 2: Gen AI Service](./genai-service/)**: Generating Personalized Highlights using Vertex AI Models (Gemini, VEO, Imagen), which is used to generate highlights based on the user's preference.
-- **[Service 3 Gmail Service](./email-service/)**: Send personalized digests via email to users (using Gmail API).
+- **[Service 3: Gmail Service](./email-service/)**: Send personalized digests via email to users (using Gmail API).
 
 
 ## How to deploy/run on your environment
