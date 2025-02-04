@@ -43,7 +43,7 @@ Selecting "right" Tools, Methodology. The whole point is to design reliable and 
 
 Solution Architecture: 
 
-<img src="/images/cloud_architecture.png" alt="Solution Architecture" width="50%" />
+<img src="/images/cloud_architecture.png" alt="Solution Architecture" width="70%" />
 
 ### Google Cloud Services Used
 
@@ -51,10 +51,12 @@ Solution Architecture:
 |--------------------------|---------------------------------------------------------------|----------------------|
 | Cloud Run Service        | Fully managed application platform, serverless compute       | Serverless Compute          |
 | Cloud Run Functions      | Event-driven serverless functions, triggered by Pub/Sub or HTTP | Serverless Compute          |
+| Cloud Build              | Build and tag containerized application on Google Cloud | Serverless Compute          |
 | Vertex AI                | One AI platform offering a wide range of ML tools for developers | AI |
 | Agent Builder            | No-code tool for building AI agents and chatbots             | AI                   |
 | Cloud SQL                | Fully managed relational database for MySQL, PostgreSQL, and SQL Server | Databases            |
 | Cloud Storage            | Scalable object storage for images, videos, and other large files | Storage             |
+| Artifact Registery       | Store Cloud Run Images before deployment | Storage             |
 | Google OAuth 2.0         | Secure authentication with single sign-on (SSO) capabilities | Security             |
 | Secret Manager           | Secure storage for managing API keys, credentials, and other sensitive data | Security             |
 | Serverless VPC           | Connect to private resources in Google Cloud without the need for traditional network management | Network              |
