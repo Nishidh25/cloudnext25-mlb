@@ -1,81 +1,66 @@
-## Working Video/Screenshots
+# My MLB: Fan Personalized Highlights for MLB
 
-
-
-
-
-# Showcasing the journey to build this project. Thoughts, challenges and solutions 
-
-
-
-## Selecting the topic/ challenge
-
+Google Cloud x MLB Hackathon Submission:
 Challenge 2: Personalized Fan Highlights: Build a system that allows fans to select team(s), player(s), etc. to follow and create audio, video, and/or text digests that fans could receive on a regular cadence to stay up on the latest highlights and commentary. Ensure your solution supports fans who speak English, Spanish, and Japanese. 
 
-### Understanding user journeys
 
-
-### Understanding the Data
-    Understanding the API's: used Google's Notebook LM to understand the API's and How to use them
-
-### Brainstorming a solution:
-    Needs to be a web app so that it is not any platform limiting, and can be prototyped quickly
-    Using Gemini to create Personalised digests from player highlights, and is multi lingual
-    Using VEO to create GIF's from Picture Highlights
-    Using Imagen to create some Images
-    Gradio will be used for Frontend Development , is desktop and mobile friendly. Low code solution in python
-    User info to be stored in Cloud SQL and all other OBJECTS(Images, videos) to be stored in BigQuery
-    
-
-
-## Designing the Google Cloud Architecture (Selecting "right" Tools, Methodology)
-The whole point is to design reliable and scalable solution
- 
-![Solution Architecture](/images/cloud_architecture.png)
-
-Microservice Architecture 
-Service 1: Frontend for the MLB (using Gradio for Quick development in python). Audio/Text based inputs as well
-Service 2: Generating Personalized Highlights using Vertex AI Models (Gemini, VEO, Imagen), which is used to generate highlights based on the users preference 
-Service 3: Send personalized digests via email to users (using Gmail API)
-
-Google Cloud:
-Compute - Cloud Run
-Network - Google VPC
-Storage - GCS (for images/gifs)
-Storage - Cloud SQL (User Metadata)
-
-
-## Explanation of modules/services
+<img src="/images/home_light_theme.png" width="400"/> 
+<img src="/images/gmail-team_digest_english.png" width="400"/>
 
 
 
+## Brainstorming a Solution
+
+- **Web App**: Needs to be a web app so that it is not platform-limiting and can be prototyped quickly.
+- **Gemini**: Used to create personalized digests from player highlights and supports multiple languages.
+- **VEO**: Used to create GIFs from picture highlights.
+- **Imagen**: Used to generate images from highlights.
+- **Gradio**: Will be used for frontend development. It is a low-code solution in Python, mobile and desktop-friendly.
+- **User Info Storage**: User information will be stored in Cloud SQL.
+- **Media Storage**: All other objects (images, videos) will be stored in BigQuery.
+
+
+
+---
+## Designing the Google Cloud Architecture
+
+Selecting "right" Tools, Methodology. The whole point is to design reliable and scalable solution
+
+Solution Architecture: 
+
+<img src="/images/cloud_architecture.png" alt="Solution Architecture" width="50%" />
+
+### Google Cloud Services Used
+
+| Product Name             | Description                                                   | Category             |
+|--------------------------|---------------------------------------------------------------|----------------------|
+| Cloud Run Service        | Fully managed application platform, serverless compute       | Serverless Compute          |
+| Cloud Run Functions      | Event-driven serverless functions, triggered by Pub/Sub or HTTP | Serverless Compute          |
+| Vertex AI                | One AI platform offering a wide range of ML tools for developers | AI |
+| Agent Builder            | No-code tool for building AI agents and chatbots             | AI                   |
+| Cloud SQL                | Fully managed relational database for MySQL, PostgreSQL, and SQL Server | Databases            |
+| Cloud Storage            | Scalable object storage for images, videos, and other large files | Storage             |
+| Google OAuth 2.0         | Secure authentication with single sign-on (SSO) capabilities | Security             |
+| Secret Manager           | Secure storage for managing API keys, credentials, and other sensitive data | Security             |
+| Serverless VPC           | Connect to private resources in Google Cloud without the need for traditional network management | Network              |
+| Cloud Armor              | Security service offering DDoS protection and ML-based threat mitigation | Security             |
+
+---
+
+### Microservice Architecture
+
+The architecture used 3 services, for detail about each service click on their link
+
+- **[Service 1](./frontend-service/readme.md)**: Frontend for the MLB (using Gradio for quick development in Python). Audio/Text-based inputs as well.
+- **[Service 2](./genai-service/readme.md)**: Generating Personalized Highlights using Vertex AI Models (Gemini, VEO, Imagen), which is used to generate highlights based on the user's preference.
+- **[Service 3](./email-service/README.md)**: [Send personalized digests via email to users (using Gmail API).
 
 
 ## How to deploy/run on your environment
 
+1. Configure Google Cloud Project.
 
 
 
-## 
 
 
-
-## Judging Criteria Checklist 
-
-Technical Implementation (40%):
-Does the Submission demonstrate a strong understanding and effective use of relevant Google Cloud services? 
-Microservice Architecture: 
-
-Does it effectively integrate and utilize relevant MLB™ data sources? See more in the rules
-
-
-Demo and Video presentation (30%):
-Is the Submission presented in a clear, concise, and engaging manner? 
-Does the presentation effectively showcase the technical challenges and solutions implemented in the Submission? See more in the rules
-
-
-Innovative Build (20%):
-Does the Submission leverage the latest Google Cloud AI and ML technologies, including those launched since Google Cloud Next 2024? (e.g., Imagen, new Vertex AI or AI Studio features). See more in the rules
-
-Creative Idea (10%):
-Does the Submission creatively address the specific challenge for MLB™? Does the Submission introduce a truly novel concept or approach to enhance the baseball fan experience? See more in the rules
