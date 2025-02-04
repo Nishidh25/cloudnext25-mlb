@@ -1,4 +1,4 @@
-# Cloud Run Function: Send Gmail to Users
+# Service 3: Gmail Service - Cloud Run Function
 
 This service leverages the Gmail Python API to send emails directly from the authenticated user's Gmail account. It is deployed as a Cloud Function, designed to serve as a simple HTTP endpoint that can be easily integrated and called by other services.
 
