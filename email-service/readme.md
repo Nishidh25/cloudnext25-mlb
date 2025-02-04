@@ -5,9 +5,8 @@ This service leverages the Gmail Python API to send emails directly from the aut
 Sample Email Digests: 
 
 2 Types: Team Digest(with Images) , Player Digests(with Players)
-<img src="/images/gmail-team_digest_english.png" width="400"/>
-<img src="/images/gmail-player_digest_english.png" width="400"/>
 
+<img src="/images/gmail-team_digest_english.png" width="400"/> <img src="/images/gmail-player_digest_english.png" width="400"/>
 
 
 ## Features
