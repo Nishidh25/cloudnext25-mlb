@@ -7,9 +7,10 @@ Challenge 2: Personalized Fan Highlights: Build a system that allows fans to sel
 #### Inspiration
 The main inspiration behind this project is to bring fans closer to the game than ever before, creating an experience where every fan feels like the Highlight is specifically tailored to them.
 
+Read more [here](/images/My%20MLB%20-%20Google%20Cloud%20Next%2325.pdf)
+
 #### What it does
 This is a web-based solution designed for MLB fans, allowing them to subscribe to teams and players. Based on their personas and preferred languages, they will receive personalized digests that keep them updated on everything they care about.
-
 
 Get basic details about the team/player in your language and persona
 
@@ -109,3 +110,5 @@ There’s still plenty of work to do to further enhance the experience:
 
 ## Submission Video 🎥
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/LWlPXoKMNgM/0.jpg)](https://www.youtube.com/watch?v=LWlPXoKMNgM)
+
+Read more [here](/images/My%20MLB%20-%20Google%20Cloud%20Next%2325.pdf)
