@@ -76,6 +76,8 @@ We dont want the frontend to be down because of any other issues. Frontend shoul
 
 ## How to deploy/run on your environment 🚀💻🔧
 
+Deploy Script currently uses gcloud cli to deploy the packages, make sure it is installed
+
 1. Configure Google Cloud Project.
 2. Configure and Enable Required API's
 3. Setup Cloud SQL Instance
