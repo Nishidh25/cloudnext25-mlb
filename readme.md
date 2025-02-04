@@ -69,7 +69,9 @@ The architecture used 3 services, for detail about each service click on their l
 3. Setup Cloud SQL Instance
 4. Setup Serverless VPC
 5. Enable Secret Manager and update deploy.sh with your environment secret values
-6. run_deploy_sevices.sh which will deploy all the 3 individual servicesat once
+6. deploy.sh which will deploy all the 3 individual servicesat once
+
+```sh deploy.sh```
 
 Building a Teraform script for deployment is still pending due to time constraints of the Hackathon
 
