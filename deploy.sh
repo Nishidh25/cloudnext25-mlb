@@ -35,3 +35,22 @@ for var in GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET instance_connection_name db_use
   # Create a secret in Google Cloud Secret Manager
   printf "%s" "$value" | gcloud secrets create "$var" --data-file=-
 done
+
+
+# Now perform the deployments for each of services
+
+# Deploy Frontend Service 1
+cd ./frontend-service
+sh deploy.sh
+cd ..
+
+# Deploy Gen AI Service 2
+cd ./genai-service
+sh deploy.sh
+cd ..
+
+# Deploy in Gmail Service 3
+cd ./email-service
+sh deploy.sh
+cd ..
+
