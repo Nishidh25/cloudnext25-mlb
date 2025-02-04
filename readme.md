@@ -1,4 +1,4 @@
-# My MLB: Fan Personalized Highlights for MLB
+# My MLB: Fan Personalized Highlights for MLB ⚾🎥✨
 
 Google Cloud x MLB Hackathon Submission:
 
@@ -24,7 +24,7 @@ Ask about any MLB Rule uisng Vertex AI Agent Builder:
 <img src="/images/vertexsearch_mlb_rules.png" width="400"/> 
 
 
-## Brainstorming a Solution
+## Brainstorming a Solution 💡🤔
 
 - **Web App**: Needs to be a web app so that it is not platform-limiting and can be prototyped quickly.
 - **Gemini**: Used to create personalized digests from player highlights and supports multiple languages.
@@ -37,7 +37,7 @@ Ask about any MLB Rule uisng Vertex AI Agent Builder:
 
 
 ---
-## Designing the Google Cloud Architecture
+## Designing the Google Cloud Architecture ☁️🌐
 
 Selecting "right" Tools, Methodology. The whole point is to design reliable and scalable solution
 
@@ -45,7 +45,7 @@ Solution Architecture:
 
 <img src="/images/cloud_architecture.png" alt="Solution Architecture" width="70%" />
 
-### Google Cloud Services Used
+### Google Cloud Services Used ☁️🔧
 
 | Product Name             | Description                                                   | Category             |
 |--------------------------|---------------------------------------------------------------|----------------------|
@@ -64,7 +64,7 @@ Solution Architecture:
 
 ---
 
-### Microservice Architecture
+### Microservice Architecture 🌍🔗🛠️
 
 The architecture used 3 services, for detail about each service click on their link
 
@@ -73,7 +73,7 @@ The architecture used 3 services, for detail about each service click on their l
 - **[Service 3: Gmail Service](./email-service/)**: Send personalized digests via email to users (using Gmail API).
 
 
-## How to deploy/run on your environment
+## How to deploy/run on your environment 🚀💻🔧
 
 1. Configure Google Cloud Project.
 2. Configure and Enable Required API's
@@ -87,5 +87,22 @@ The architecture used 3 services, for detail about each service click on their l
 Building a Teraform script for deployment is still pending due to time constraints of the Hackathon
 
 
+## Challenges I ran into ⚠️⛰️💔
+Integrating microservices proved to be a bit tricky, especially in ensuring seamless communication between them. However, I overcame this challenge by leveraging Google Cloud's serverless services, which eliminated the need to manage infrastructure manually. Managing time was another obstacle, given that I had to complete everything within a tight deadline.
 
+Most of the Challenges related to the code and deployment were fixed by using Cloud Logs in GCP.
 
+## Accomplishments that im proud of 🏆✨🥇
+I'm incredibly proud of completing this project in under 15 days. I got involved in the hackathon quite late—almost at the end of January—and despite the limited time, I’m thrilled with the results, especially deploying and finalizing the project within this tight timeframe.
+
+## What i learned 📚💡
+Throughout the process, I gained valuable experience with Google Cloud Architecture and tools like Vertex AI Agent Builder. I also learned the importance of focusing on the marking criteria during a hackathon and how crucial it is to prioritize security when working in the cloud.
+
+## What's next for My MLB - Personalized Fan Highlights ⚾
+There’s still plenty of work to do to further enhance the experience:
+1. **Leverage Imagen** to style images within fan digests for more visual appeal.
+2. **Incorporate VEO 2** to automatically generate videos from images included in each digest.
+3. **Personalize even further** by pulling user details, such as age and advertising ID, from their Google accounts to create an even more tailored experience.
+
+## Submission Video 🎥
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/LWlPXoKMNgM/0.jpg)](https://www.youtube.com/watch?v=LWlPXoKMNgM)
