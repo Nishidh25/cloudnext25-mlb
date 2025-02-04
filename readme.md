@@ -1,4 +1,4 @@
-# My MLB: Fan Personalized Highlights for MLB ⚾🎥✨
+# My MLB: Personalized Fan Highlights of MLB ⚾🎥✨
 
 Google Cloud x MLB Hackathon Submission:
 
@@ -72,6 +72,7 @@ The architecture used 3 services, for detail about each service click on their l
 - **[Service 2: Gen AI Service](./genai-service/)**: Generating Personalized Highlights using Vertex AI Models (Gemini, VEO, Imagen), which is used to generate highlights based on the user's preference.
 - **[Service 3: Gmail Service](./email-service/)**: Send personalized digests via email to users (using Gmail API).
 
+We dont want the frontend to be down because of any other issues. Frontend should always be accessable from the users.
 
 ## How to deploy/run on your environment 🚀💻🔧
 
